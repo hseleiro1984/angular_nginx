@@ -1,0 +1,58 @@
+name: Build & Push Docker Image
+
+on:
+  push:
+    branches:
+      - main # Or master, or whichever branch triggers the pipeline
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # The environment where the job will run
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4 # Action to get your source code
+
+      - name: Set up Docker Buildx
+        # Required for building and pushing to registries
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        # Replace docker.io with your registry if not using Docker Hub
+        uses: docker/login-action@v3
+        with:
+          # You need to set these as secrets in your GitHub repository settings
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }} # Or DOCKER_HUB_PASSWORD
+
+      - name: Extract Docker metadata
+        # This action helps generate proper tags automatically (e.g., based on branch, commit SHA)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            your-dockerhub-username/your-angular-app # Replace with your desired image name and registry prefix
+          tags: |
+            type=ref,event=branch
+            type=sha
+
+      - name: Build and push Docker image
+        uses: docker/build-and-push-action@v5
+        with:
+          context: . # Look for Dockerfile in the current directory
+          push: true # Push the image to the registry after building
+          tags: ${{ steps.meta.outputs.tags }} # Use the generated tags
+          labels: ${{ steps.meta.outputs.labels }} # Add labels from metadata
+          cache-from: type=gha # Enable caching layers for faster builds
+          cache-to: type=gha,mode=max # Enable caching layers for faster builds
+
+      # --- Optional: Add steps for other tests if needed ---
+      # If you had E2E tests that run against a live container:
+      # - name: Run E2E Tests
+      #   run: |
+      #     docker run -d --name angular-app -p 80:80 your-dockerhub-username/your-angular-app:${{ steps.meta.outputs.version }}
+      #     # Wait for the app to be healthy (might need a script or wait-for-it.sh)
+      #     # Run your E2E test commands here (e.g., npx cypress run)
+      #     # Make sure your E2E test runner can access the container (e.g., via localhost if running on the same network)
+      #   # You'd typically use docker compose for multi-service E2E tests
+
