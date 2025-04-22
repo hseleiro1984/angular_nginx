@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  angular-frontend:
+    container_name: my-angular-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: my-angular-nginx:latest
+    ports:
+      - "8080:80"  # Map port 80 in the container to 8080 on the host
+    restart: unless-stopped

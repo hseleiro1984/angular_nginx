@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  angular-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.step3
+    container_name: angular-app
+    ports:
+      - "8086:80"
