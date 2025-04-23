@@ -12,7 +12,7 @@ COPY angular-app/package*.json ./ # Copies to /angular-app/package*.json
 RUN npm install
 
 # Copy the rest of your application code from the 'angular-app' subdir into the WORKDIR
-COPY angular-app/. . # Copies angular-app/* into /angular-app/
+COPY angular-app/. .
 
 # Run tests - runs INSIDE /angular-app
 RUN npm test -- --no-watch --reporters=default --code-coverage
