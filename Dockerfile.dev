@@ -1,26 +1,19 @@
-# --- Build Stage (using your name 'builder' or similar) ---
-FROM node:latest as builder # Start from a node image
+FROM node:18-alpine
 
-WORKDIR /angular-app # <-- Set the working directory here
+WORKDIR /angular-app
 
-# Copy package.json and package-lock.json (or yarn.lock)
-# The './' here is RELATIVE TO THE WORKDIR (/angular-app)
-# The first '.' is RELATIVE TO THE BUILD CONTEXT (root of your git repo)
-COPY package.json package-lock.json ./
+# Copy package.json and package-lock.json
+COPY /angular-app/package*.json ./
 
-# Install dependencies - runs INSIDE /angular-app
+# Install dependencies
 RUN npm install
+RUN npm install -g @angular/cli
 
-# Copy the rest of your application code - copies into /angular-app
-COPY . .
+# The source code will be mounted as a volume in docker-compose.dev.yml
+# so we don't need to copy it here
 
-# Run tests - runs INSIDE /angular-app
-RUN npm test -- --no-watch --reporters=default --code-coverage
+# Expose port for Angular development server
+EXPOSE 4200
 
-# Build the app - runs INSIDE /angular-app
-RUN ng build --configuration production
-
-# --- Serve Stage ---
-# (This part uses a different base image and doesn't need /angular-app)
-FROM nginx:alpine as runner
-# ... copy build artifacts from builder stage ...
+# Start Angular development server with host 0.0.0.0 to make it accessible outside the container
+CMD ["ng", "serve", "--host", "0.0.0.0", "--poll=2000"]
