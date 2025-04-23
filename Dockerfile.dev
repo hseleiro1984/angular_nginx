@@ -3,7 +3,7 @@ FROM node:18-alpine
 WORKDIR /app
 
 # Copy package.json and package-lock.json
-COPY angular-app/package*.json ./
+COPY anguladadasdas/package*.json ./
 
 # Install dependencies
 RUN npm install
