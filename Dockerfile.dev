@@ -2,11 +2,11 @@ FROM node:latest as builder
 
 WORKDIR /angular-app
 
-COPY angular-app/package*.json ./ # Copies to /angular-app/package*.json
+COPY angular-app/package*.json ./
 
 RUN npm install
 
-COPY angular-app/. .
+COPY angular-app/.
 
 RUN npm test -- --no-watch --reporters=default --code-coverage
 
