@@ -1,19 +1,30 @@
-FROM node:18-alpine
+# --- Build Stage ---
+FROM node:latest as builder
 
-WORKDIR /app
+# Set the working directory FIRST
+WORKDIR /angular-app # <-- This should be early in the file
 
-# Copy package.json and package-lock.json
-COPY /angular-app/package*.json ./
+# Now, COPY using paths relative to the build context (repo root)
+# The destination './' is relative to the WORKDIR (/angular-app)
+COPY angular-app/package*.json ./ # Copies to /angular-app/package*.json
 
-# Install dependencies
+# Install dependencies - runs INSIDE /angular-app
 RUN npm install
-RUN npm install -g @angular/cli
 
-# The source code will be mounted as a volume in docker-compose.dev.yml
-# so we don't need to copy it here
+# Copy the rest of your application code from the 'angular-app' subdir into the WORKDIR
+COPY angular-app/. . # Copies angular-app/* into /angular-app/
 
-# Expose port for Angular development server
-EXPOSE 4200
+# Run tests - runs INSIDE /angular-app
+RUN npm test -- --no-watch --reporters=default --code-coverage
 
-# Start Angular development server with host 0.0.0.0 to make it accessible outside the container
-CMD ["ng", "serve", "--host", "0.0.0.0", "--poll=2000"]
+# Build the app - runs INSIDE /angular-app
+RUN ng build --configuration production
+
+# --- Serve Stage ---
+FROM nginx:alpine as runner
+
+# Copy the built application from the builder stage
+# Assuming your build output goes to /angular-app/dist/your-app-name in the builder
+COPY --from=builder /angular-app/dist/your-app-name /usr/share/nginx/html
+
+# ... rest of your Nginx setup ...
