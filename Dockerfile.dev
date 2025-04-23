@@ -1,6 +1,6 @@
 FROM node:18-alpine
 
-WORKDIR /angular-app
+WORKDIR /app
 
 # Copy package.json and package-lock.json
 COPY angular-app/package*.json ./
