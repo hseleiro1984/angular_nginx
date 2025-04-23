@@ -9,7 +9,7 @@ services:
     ports:
       - "4200:4200"
     volumes:
-      - ./angular-app:/app
+      - ./angular-app:/angular-app
       - /app/node_modules
     working_dir: /app
     # Add this to ensure the node user can write to the mounted volumes
