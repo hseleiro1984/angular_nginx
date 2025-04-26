@@ -1,3 +1,4 @@
 [submodule "angular-app"]
     path = angular-app
     url = https://github.com/hseleiro1984/angular_nginx.git
+	branch = main
