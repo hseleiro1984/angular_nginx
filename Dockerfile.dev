@@ -2,11 +2,11 @@ FROM node:latest as builder
 
 WORKDIR /angular-app
 
-COPY ./package*.json ./
+COPY angular-app/package*.json ./
 
 RUN npm install
 
-COPY . .
+COPY angular-app/. ./
 
 RUN npm test -- --no-watch --reporters=default --code-coverage
 
@@ -14,4 +14,5 @@ RUN ng build --configuration production
 
 FROM nginx:alpine as runner
 
-COPY --from=builder /angular-app/dist/your-app-name /usr/share/nginx/html
+COPY --from=builder /angular-app/dist/angular-app /usr/share/nginx/html
+
