@@ -4,7 +4,7 @@ WORKDIR /angular-app
 
 COPY angular-app/package*.json
 
-RUN npm install # This will now run in /angular-app and find the copied package.json
+RUN npm install
 
 COPY angular-app/. ./
 
