@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4 # Action to get your source code
+        with:
+          submodules: 'recursive'
 
       - name: Set up Docker Buildx
         # Required for building and pushing to registries
