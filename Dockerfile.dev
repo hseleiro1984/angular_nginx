@@ -1,18 +1,39 @@
 FROM node:latest as builder
 
-WORKDIR /angular-app
+# --- Debugging Steps ---
+# List the root of the build context provided by GitHub Actions
+RUN echo "--- Listing root context ---" && ls -al
 
+# List the contents of the 'angular-app' directory in the build context
+# This command will FAIL if 'angular-app' doesn't exist at the root
+RUN echo "--- Listing angular-app context ---" && ls -al angular-app
+# --- End Debugging Steps ---
+
+WORKDIR /angular-app # Set the working directory inside the container to /angular-app
+
+# Copy package.json and package-lock.json from the 'angular-app' subdirectory in the build context
+# to the WORKDIR inside the container (which is /angular-app)
 COPY angular-app/package*.json ./
 
-RUN npm install
+# --- Debugging Step 2 ---
+# List the contents of the WORKDIR *after* the COPY command
+RUN echo "--- Listing WORKDIR (/angular-app) after COPY ---" && ls -al
+# --- End Debugging Step 2 ---
 
+RUN npm install # This will now run in /angular-app and find the copied package.json
+
+# Copy the rest of your application code from the 'angular-app' subdirectory in the build context
+# into the current WORKDIR inside the container (/angular-app).
 COPY angular-app/. ./
 
-RUN npm test -- --no-watch --reporters=default --code-coverage
+RUN npm test -- --no-watch --reporters=default --code-coverage # Runs in /angular-app
 
-RUN ng build --configuration production
+RUN ng build --configuration production # Runs in /angular-app
 
+# --- Serve Stage ---
 FROM nginx:alpine as runner
 
-COPY --from=builder /angular-app/dist/angular-app /usr/share/nginx/html
+# Replace 'my-angular-app' with your actual project name from angular.json
+COPY --from=builder /angular-app/dist/my-angular-app /usr/share/nginx/html
 
+# ... rest of your Nginx setup ...
